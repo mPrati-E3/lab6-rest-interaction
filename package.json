@@ -1,0 +1,17 @@
+{
+  "name": "it.polito.wa1",
+  "version": "1.0.0",
+  "description": "Todo list web server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "alberto-mr",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "moment": "^2.24.0",
+    "morgan": "^1.10.0",
+    "sqlite3": "^4.1.1"
+  }
+}
