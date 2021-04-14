@@ -5,6 +5,8 @@ import Filter from './filter.js';
 import * as Api from './api.js';
 
 class App {
+
+    // modal contructor for the App
     constructor() {
         this.getTasks();
 
@@ -21,7 +23,9 @@ class App {
         });
     }
 
+    // method to get all the tasks in my app
     async getTasks(){
+
         //create the filter view and visualize tasks and projects
         this.filterView = new Filter();
         this.filterView.showTasks('filter-all');
@@ -74,9 +78,12 @@ class App {
                 deadline = moment(deadlineDate);
 
             if(addForm.elements["form_id"].value && addForm.elements["form_id"].value !== ""){
+
                 //there is a task id -> update
                 const id = addForm.elements["form_id"].value;
                 const task = new Task(id,description,important,privateTask,deadline,project);
+
+                // call an async API, I have to wait (using then)
                 Api.updateTask(task) 
                     .then(() => {
                         //remove errors, if any
@@ -111,6 +118,7 @@ class App {
                 //the id is empty -> add
                 const task = new Task(null,description,important,privateTask,deadline,project);
 
+                // call an async API, I have to wait (using then)
                 Api.addTask(task)
                     .then(() => {
                         //remove errors, if any

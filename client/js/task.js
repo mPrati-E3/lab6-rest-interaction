@@ -1,5 +1,6 @@
 'use strict';
 
+// bean
 class Task{    
 
     constructor(id, description, important, privateTask, deadline, project, completed) {

@@ -1,5 +1,7 @@
 'use strict'
 
+// connect my application with the database in sqlite3
+
 var sqlite = require('sqlite3').verbose();
 
 const DBSOURCE = './db/tasks.db';

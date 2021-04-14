@@ -7,7 +7,7 @@ class Filter{
     
     /**
      * Function to create the <ul></ul> list of tasks
-     * @param {*} filterType an optinal filter
+     * @param {*} filterType an optional filter
      */
     async showTasks(filterType){
         const taskList = document.getElementById("taskList");
@@ -15,6 +15,7 @@ class Filter{
         this.clearTasks();
         let tasks;
 
+        // I'll switch the filterType to understand which tasks I have to write in my table
         switch(filterType){
             case "filter-all":
                 tasks = await Api.getTasks();
@@ -49,7 +50,8 @@ class Filter{
         for(const task of tasks){
             const taskNode = this.createTaskNode(task);
             taskList.appendChild(taskNode);
-            //set a timeout to mark the deadline, if the deadline is "valid"
+            // set a timeout to mark the deadline, if the deadline is "valid"
+            // if I'm out of time to complete a task, the task will be colored
             const now = moment();
             if(task.deadline && task.deadline.isValid() && task.deadline.isAfter(now) ) {
 
@@ -66,6 +68,7 @@ class Filter{
 
     }
 
+    // For every task displayed, I'll show the corresponding project
     async showProjects(){
         const projectList = document.getElementById("projects");
         this.clearProjects();
@@ -87,14 +90,22 @@ class Filter{
      * @param {*} task the task object
      */
     createTaskNode(task){
+
+        // create the li
         const li = document.createElement('li');
         li.id = "task"+task.id;
         li.className = 'list-group-item';
+
+        // create the inner div
         const innerDiv = document.createElement('div');
         innerDiv.className = 'custom-control custom-checkbox';
+
+        // create the external div
         const externalDiv = document.createElement('div');
         externalDiv.className = 'd-flex w-100 justify-content-between';
         
+        // create the checkboxes (important and completed)
+        // I'll add them to the innerDiv after the event listener
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.id = "check-t"+ task.id;
@@ -114,14 +125,17 @@ class Filter{
             else 
                 task.completed = false;
             
+                // I'll call the API to update the task in my database (passing via server)
+                // this call is async so i have to use then
                 Api.updateTask(task) 
                 .then(() => {
+
                     //remove errors, if any
                     document.getElementById('errorMsg').innerHTML = '';
+
                     //refresh the user interface
                     this.filterView.clearTasks();
                     this.filterView.showTasks('filter-all');
-
                     this.filterView.clearProjects();
                     this.filterView.showProjects();
 
@@ -137,10 +151,11 @@ class Filter{
                         // add an alert message in DOM
                         document.getElementById('errorMsg').innerHTML = `
                             <div class="alert alert-danger alert-dismissible fade show" role="danger">
-                            <strong>Error:</strong> <span>${errorString}</span> 
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
+                                <strong>Error:</strong> 
+                                <span>${errorString}</span> 
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
                             </div>`;
                     }
                 }); 
@@ -149,20 +164,25 @@ class Filter{
         
         innerDiv.appendChild(checkbox);
         
+        // create label
         const descriptionText = document.createElement('label');
         descriptionText.className = 'description custom-control-label';
         descriptionText.innerText = task.description;
         descriptionText.htmlFor = "check-t"+ task.id;
         innerDiv.appendChild(descriptionText);
         
+        // if my task is into a project, create the project
         if(task.project){
             const projectText = document.createElement('span');
             projectText.className = 'project badge badge-primary ml-4';
             projectText.innerText = task.project;
             innerDiv.appendChild(projectText);
         }
+
+        // insert the innerDiv into the externalDiv
         externalDiv.appendChild(innerDiv);
 
+        // the date is not in the innerDiv but directly into the externalDiv
         if(task.deadline){
             const dateText = document.createElement('small');
             dateText.className = 'date';
@@ -177,8 +197,10 @@ class Filter{
             externalDiv.appendChild(dateText);
         }     
 
+        // create a div dedicated to buttons
         const buttonsDiv = document.createElement('div');
 
+        // create an image using the edit.svg file
         const imgEdit = document.createElement('img');
         imgEdit.width = 20;
         imgEdit.height = 20;
@@ -208,8 +230,10 @@ class Filter{
             document.getElementById("addButton").click();
         });
 
+        // the edit image is a button, so I add that to the dedicated div
         buttonsDiv.appendChild(imgEdit);
 
+        // create an image using the delete.svg file
         const imgDelete = document.createElement('img');
         imgDelete.width = 20;
         imgDelete.height = 20;
@@ -218,6 +242,8 @@ class Filter{
 
         //callback to delete a task
         imgDelete.addEventListener('click', event => {
+
+            // Here I have to call an API to delete the tasks so I have to wait for that because it's async
             Api.deleteTask(task.id)
             .then(() => {
                 this.clearTasks();
@@ -232,19 +258,22 @@ class Filter{
                     // add an alert message in DOM
                     document.getElementById('errorMsg').innerHTML = `
                         <div class="alert alert-danger alert-dismissible fade show" role="danger">
-                        <strong>Error:</strong> <span>${errorString}</span> 
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                            <strong>Error:</strong> <span>${errorString}</span> 
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                         </div>`;
                 }
             });
         });
        
+        // the delete image is a button, so I add that to the dedicated div
         buttonsDiv.appendChild(imgDelete);
 
+        // I'll add the div dedicated to buttons to the externalDiv
         externalDiv.appendChild(buttonsDiv);
 
+        // if the task is private, add a custom image (build by svg) near the task
         if(!task.privateTask){
             innerDiv.insertAdjacentHTML("afterend", `<svg class="bi bi-person-square" width="1.2em" height="1.2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" d="M14 1H2a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V2a1 1 0 00-1-1zM2 0a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V2a2 2 0 00-2-2H2z" clip-rule="evenodd"/>
@@ -252,7 +281,9 @@ class Filter{
               </svg> `);
         }
 
+        // add the externalDiv to the parent li
         li.appendChild(externalDiv);
+
         return li;
     }
 
